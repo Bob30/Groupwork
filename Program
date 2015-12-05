@@ -1,0 +1,192 @@
+#install.packages("dplyr")
+library("dplyr")
+library("readr")
+library("stringr")
+library("ggplot2")
+#install.packages("devtools")
+library("devtools")
+
+# loading files
+#loading CV
+cv.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/5ba8002ea1e47198c4033824b6c40b29cf618f2e/CV.final.csv")
+dagpenge.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/dagpenge.final.csv")
+job.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/job.final.csv")
+jobansogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobansogning.final.csv")
+jobindex.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobindex.final.csv")
+jobnet.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobnet.final.csv")
+jobportalen.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobportalen.final.csv")
+jobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobs.final.csv")
+jobsogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobsogning.final.csv")
+jobzonen.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobzonen.final.csv")
+kontanthjaelp.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/kontanthjaelp.final.csv")
+ledigejob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520job.final.csv")
+ledigejobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520jobs.final.csv")
+nytjob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/nyt%2520job.final.csv")
+ofir.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ofir.final.csv")
+
+## Loads the actual unemployment rate from Statistics Denmark
+library("dkstat")
+dst_search(string = "AUS08", field = "text")
+
+dst_meta("AUS08", lang="en") 
+
+AUS08 = dst_get_data(table = "AUS08", OMRÅDE = "All Denmark", 
+                     SAESONFAK = "Enumerated actual figures  in percent of the labour force", 
+                     Tid = "*",
+                     lang='en')
+AUS08
+
+# we don't need the column 'område' 
+AUS08 <- AUS08[,c(-1)]
+# or the column 'saesonfak'
+AUS08 <- AUS08[,c(-1)]
+
+# Add row to AUS08 so it is possible to merge with the keywords
+AUS08 <- cbind(X=1:nrow(AUS08), AUS08)
+
+# Export the AUS08
+#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/AUS08.csv", x=AUS08)
+
+## The unemployment rate is converted to index numbers in excel, 
+# where the highest unemployment rate is 6.9
+UnemIndex.1 = read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/UnemploymentIndex.csv")
+
+UnemIndex.1 <- cbind(X=1:nrow(UnemIndex.1), UnemIndex.1)
+throwout <- c("Var.2", "TID")
+UnemIndex.1 <- UnemIndex.1[, ! names(UnemIndex.1) %in% throwout, drop = F]
+
+#################################
+
+#merges data together by Month (dagpenge has a different data format than the rest)
+merged.data1 <- merge(cv.1, dagpenge.1, by="Month")
+merged.data2 <- merge(jobsogning.1, jobansogning.1, by="Month")
+merged.data3 <- merge(kontanthjaelp.1, ledigejobs.1, by="Month")
+merged.data4 <- merge(ledigejob.1, jobnet.1, by="Month")
+merged.data5 <- merge(jobindex.1, nytjob.1, by="Month")
+merged.data6 <- merge(jobportalen.1, ofir.1, by="Month")
+merged.data7 <- merge(job.1, jobs.1, by="Month")
+merged.data8 <- merge(merged.data1, merged.data2, by="Month")
+merged.data9 <- merge(merged.data3, merged.data8, by="Month")
+merged.data10 <- merge(merged.data4, merged.data5, by="Month")
+merged.data11 <- merge(merged.data6, merged.data7, by="Month")
+merged.data12 <- merge(merged.data11, merged.data10, by="Month")
+merged.data13 <- merge(merged.data12, merged.data9, by="Month")
+
+# The X-columns appears too many times, so we delete the all except for one
+cols.dont.want <- c("X.x.x.x", "X.y.x.x", "X.x.y.x", "X.y.y.x", "X.x.x.y", "X.y.x.y", "X.x.y.y", "X.y.y.y", "X.y", "X.x.x", "X.y.x", "X.x.y", "X.y.y") # if you want to remove multiple columns
+merged.data13 <- merged.data13[, ! names(merged.data13) %in% cols.dont.want, drop = F]
+
+# Reorder the columns
+merged.data13 <- merged.data13[,c(10,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16)] 
+names(merged.data13)
+names(merged.data13)[1] <- "X"
+
+merged.data14 <- left_join(merged.data13, UnemIndex.1, by="X")
+
+merged.data14$dates <- as.Date(merged.data14$Month, "%m/%d/%y") 
+merged.data15 <- merged.data14[,c(1,18,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)] 
+names(merged.data15)[17] <- "UnemRate"
+
+#exports the data frame
+#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/data.final2.csv", x=merged.data15)
+########################################################################################################################################################
+
+# Start from here
+# load the data
+#merged.data15 = read.csv("C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/data.final2.csv")
+## merged.data17 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/31d0477878cf8909e58e6a5d8637a76297909185/CV.final.csv")
+# if you just load the final data (data.final2), you have to delete the first column, X.1, which is weird!
+merged.data16=merged.data15[,-c(1)]
+
+
+#####################
+
+
+library(tidyr)
+library(dplyr)
+## Plots all the variables in one graph
+df = merged.data16
+df = select(df, -c(X)) # maybe also X.1, 
+df = gather(df, indicator, value, -dates)
+
+p = ggplot(df, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+
+## The variable Jobportalen has a lot of zeroes, so we delete the variable.
+final2= merged.data16[,c(-3)]
+# plot it again
+df2 = final2
+df2 = select(df2, -c(X)) # maybe also X.1, 
+df2 = gather(df2, indicator, value, -dates)
+
+p = ggplot(df2, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+## Ofir and jobsogning is decreasing over timer, so we delete as well.
+
+final3= final2[,-c(3,14)]
+# plot it again
+df3 = final3
+df3 = select(df3, -c(X)) # maybe also X.1, 
+df3 = gather(df3, indicator, value, -dates)
+
+p = ggplot(df3, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+######################################
+# Trying to make an index
+df.wide = df3 %>% spread(indicator, value)
+df.wide = df.wide[complete.cases(df.wide), ]
+head(df.wide)
+
+#PCA (fjerner dates og den reelle unemployment rate)
+pca = princomp(select(df.wide, -c(dates,UnemRate)))
+summary(pca)
+
+#Creating an index
+unemployment.index = predict(pca)[, 1]
+unemployment.index = data.frame(unemployment.index = unemployment.index, dates = df.wide$dates)
+
+
+# Compare to unemployment rate
+#install.packages("lubridate")
+library("lubridate")
+Unemploymentrate = df.wide %>% select(dates, UnemRate)
+unemployment.data = left_join(unemployment.index, Unemploymentrate)
+
+head(unemployment.data)
+
+
+## Plot
+## Something goes wrong with the index
+unemployment.data = unemployment.data %>% 
+  mutate(
+    unemployment.index = scale(unemployment.index * (-1)),
+    value = scale(unemployment.index)
+  )
+unemployment.data = unemployment.data %>% gather(index, value, -dates)
+head(unemployment.data)
+
+## Plot
+p = ggplot(unemployment.data, aes(x = as.Date(dates), y = unemployment.index))
+p + geom_line()
+
+
+#### 
+# plots CV and the unemployment in one graph 
+# the axis on the right side needs to be adjusted 
+# See http://www.r-bloggers.com/r-single-plot-with-two-different-y-axes/
+par(merged.data16, aes(x = as.Date(dates), y = CV.Interst.over.time.))
+p + geom_line(col="red3")  
+
+par(new = T)
+with(merged.data16, plot(as.Date(dates), value, pch=16, axes=F, xlab=NA, ylab=NA, cex=1.2))
+axis(side = 4)
+mtext(side = 5, line = 1, 'Unemployment rate in per cent')
+legend("bottomleft",
+       legend=c(expression(CV_search), "Unempl.rate"),
+       lty=c(1,0), pch=c(NA, 16), col=c("red3", "black"))
+
+
+############
