@@ -136,6 +136,32 @@ df3 = gather(df3, indicator, value, -dates)
 p = ggplot(df3, aes(x = as.Date(dates), y = value, colour = indicator))
 p + geom_line()
 
+# plotting the words in small graphs in one image.
+
+df5 = final3
+df5<- df5[,c(-14)]
+df5 = select(df5, -c(X)) # maybe also X.1, 
+df5 = gather(df5, indicator, value, -dates)
+df6<- merge(df5, final3, by="dates")
+df6<-df6[,c(-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15)]
+
+
+library("ggplot2")
+p = ggplot(df6, aes(x = as.Date(dates), y = value))
+p + geom_point() + facet_wrap(~ indicator) +
+  geom_smooth() + geom_line(aes(y=UnemRate), colour="red")
+#smooth might not be the best here
+
+p = ggplot(df6, aes(x = as.Date(dates), y = value))
+p + geom_point() + facet_wrap(~ indicator)+ 
+  geom_line(aes(y=UnemRate), colour="red")
+#Points can be nice..
+
+p = ggplot(df6, aes(x = as.Date(dates), y = value))
+p + geom_line() + facet_wrap(~ indicator)+ 
+  geom_line(aes(y=UnemRate), colour="red")
+# nice to see the overal trend with lines.
+
 
 # plotting the words with the indexed unemployment. There might be a simpler way, however I feel that for us it is more practical to focus on getting things to work. Not on the most efficient code.
 Jobdf= final3
