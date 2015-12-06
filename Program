@@ -253,6 +253,10 @@ p + geom_line() + facet_wrap(~ indicator)+
   geom_line(aes(y=UnemRate), colour="red")
 # nice to see the overal trend with lines.
 
+p = ggplot(df6, aes(x = as.Date(dates), y = value))
+p + geom_smooth() + facet_wrap(~ indicator)+ 
+  geom_smooth(aes(y=UnemRate), colour="red")
+#here we purely see the overal trend, not the short term trends.
 
 ######################################
 # Trying to make an index
