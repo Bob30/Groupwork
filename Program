@@ -312,5 +312,17 @@ legend("bottomleft",
        legend=c(expression(CV_search), "Unempl.rate"),
        lty=c(1,0), pch=c(NA, 16), col=c("red3", "black"))
 
-
 ############
+# Regressions
+# First I regress all the variables, including the ones we deleted
+reg1 = lm(UnemRate ~ Job.Interst.over.time. + Jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time. + Ofir.Interst.over.time.+Jobportalen.Interst.over.time. + Jobsogning.Interst.over.time., data=merged.data16) 
+summary(reg1)
+# Ofir and Jobsogning is surprisingly significant, as I can see... 
+
+# Second, I regress only the variables that we kept in final3.
+reg2 = lm(UnemRate ~ Job.Interst.over.time. + Jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+summary(reg2)
+
+# Last, I regress the significant variables (made a bit sloppy, so we should doublecheck)
+reg3 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.job.Interst.over.time. + jobindex.Interst.over.time. + CV.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+summary(reg3)
