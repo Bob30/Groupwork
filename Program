@@ -136,6 +136,99 @@ df3 = gather(df3, indicator, value, -dates)
 p = ggplot(df3, aes(x = as.Date(dates), y = value, colour = indicator))
 p + geom_line()
 
+
+# plotting the words with the indexed unemployment. There might be a simpler way, however I feel that for us it is more practical to focus on getting things to work. Not on the most efficient code.
+Jobdf= final3
+Jobdf<- Jobdf[,c(-4,-5,-6,-7,-8,-9,-10,-11,-12, -13)]
+ggplot(Jobdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+#I think we should delete that one observation. It pushes the other obsevations down..
+Jobsdf=final3
+Jobsdf<- Jobsdf[,c(-3,-5,-6,-7,-8,-9,-10,-11,-12, -13)]
+ggplot(Jobsdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobs.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+
+Ledigedf=final3
+Ledigedf<- Ledigedf[,c(-4,-3,-6,-7,-8,-9,-10,-11,-12, -13)]
+ggplot(Ledigedf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Jobnetdf=final3
+Jobnetdf<- Jobnetdf[,c(-4,-3,-5,-7,-8,-9,-10,-11,-12, -13)]
+ggplot(Jobnetdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobnet.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+jobindexdf=final3
+jobindexdf<- jobindexdf[,c(-4,-3,-5,-6,-8,-9,-10,-11,-12, -13)]
+ggplot(jobindexdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = jobindex.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Nytjobdf=final3
+Nytjobdf<- Nytjobdf[,c(-4,-3,-5,-6,-7,-9,-10,-11,-12, -13)]
+ggplot(Nytjobdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Nyt.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Kontantdf=final3
+Kontantdf<- Kontantdf[,c(-4,-3,-5,-6,-7,-8,-10,-11,-12, -13)]
+ggplot(Kontantdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Kontanthjaelp.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Ledigejobsdf=final3
+Ledigejobsdf<- Ledigejobsdf[,c(-4,-3,-5,-6,-7,-8,-9,-11,-12, -13)]
+ggplot(Ledigejobsdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.jobs.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+CVdf=final3
+CVdf<- CVdf[,c(-4,-3,-5,-6,-7,-8,-9,-10,-12, -13)]
+ggplot(CVdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = CV.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+dagpengedf=final3
+dagpengedf<- dagpengedf[,c(-4,-3,-5,-6,-7,-8,-9,-10,-11, -13)]
+ggplot(dagpengedf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = dagpenge.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+jobansogningdf=final3
+jobansogningdf<- jobansogningdf[,c(-3,-4,-5,-6,-7,-8,-9,-10,-11,-12)]
+ggplot(jobansogningdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobansogning.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+
 ######################################
 # Trying to make an index
 df.wide = df3 %>% spread(indicator, value)
