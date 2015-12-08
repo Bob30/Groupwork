@@ -128,7 +128,7 @@ p + geom_line()
 
 ## Ofir and jobsogning is decreasing over timer, so we delete as well.
 ## The variable Jobs has one observations that is extremely high, therefore lowering the relative value of the other observations.
-## We therefore exclude this variable from our project. (NEEDS TO BE DONE) (steve jobs died)
+## We therefore exclude this variable from our project. (NEEDS TO BE DONE) (steve jobs died and a lot of general news about jobs in US skews our graph for unemployment)
 
 final3= final2[,-c(3,14)]
 # plot it again
