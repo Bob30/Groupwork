@@ -25,7 +25,7 @@ nytjob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a
 ofir.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ofir.final.csv")
 
 ## Loads the actual unemployment rate from Statistics Denmark
-Install.packages("dksat")
+Install.packages("dkstat")
 library("dkstat")
 dst_search(string = "AUS08", field = "text")
 
