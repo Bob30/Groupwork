@@ -317,7 +317,7 @@ p = ggplot(unemployment.data, aes(x = dates, y = actual.unemployment, group = in
 p + geom_line()  + theme_minimal()
 
 ############
-# Regressions
+# Regressions (NOTE: maybe use the unindexed unemployment, so that we can use it in the actual prediction of the unemployment.)
 # First I regress all the variables, including the ones we deleted
 reg1 = lm(UnemRate ~ Job.Interst.over.time. + Jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time. + Ofir.Interst.over.time.+Jobportalen.Interst.over.time. + Jobsogning.Interst.over.time., data=merged.data16) 
 summary(reg1)
