@@ -94,7 +94,7 @@ names(merged.data15)[17] <- "UnemRate"
 
 # Start from here
 # load the data
-#merged.data15 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/893e536d8e48ea379580706bf9e481ebed044c0b/data.final2.csv")
+merged.data15 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/4df89ca79b8b4ad0c64f5655350e2d408e6ebf1e/data.final3.csv")
 ## merged.data17 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/31d0477878cf8909e58e6a5d8637a76297909185/CV.final.csv")
 # if you just load the final data (data.final2), you have to delete the first column, X.1, which is weird!
 merged.data16=merged.data15[,-c(1)]
