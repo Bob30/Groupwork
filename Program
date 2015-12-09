@@ -128,9 +128,9 @@ p + geom_line()
 
 ## Ofir and jobsogning is decreasing over timer, so we delete as well.
 ## The variable Jobs has one observations that is extremely high, therefore lowering the relative value of the other observations.
-## We therefore exclude this variable from our project. (NEEDS TO BE DONE) (steve jobs died and a lot of general news about jobs in US skews our graph for unemployment)
+## We therefore exclude this variable from our project. (NEEDS TO BE DONE)
 
-final3= final2[,-c(3,14)]
+final3= final2[,-c(3,5,14)]
 # plot it again
 df3 = final3
 df3 = select(df3, -c(X)) # maybe also X.1, 
@@ -141,106 +141,14 @@ df3 <- unique(df3)
 p = ggplot(df3, aes(x = as.Date(dates), y = value, colour = indicator))
 p + geom_line()
 
-# plotting the words with the indexed unemployment. This might be possible in a simpler way, however I feel that for us it is more practical to focus on getting things to work. Not on the most efficient code.
-
-Jobdf= final3
-Jobdf<- Jobdf[,c(-4,-5,-6,-7,-8,-9,-10,-11,-12, -13)]
-ggplot(Jobdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Job.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-#I think we should delete that one observation. It pushes the other obsevations down..
-Jobsdf=final3
-Jobsdf<- Jobsdf[,c(-3,-5,-6,-7,-8,-9,-10,-11,-12, -13)]
-ggplot(Jobsdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Jobs.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-
-Ledigedf=final3
-Ledigedf<- Ledigedf[,c(-4,-3,-6,-7,-8,-9,-10,-11,-12, -13)]
-ggplot(Ledigedf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Ledige.job.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-Jobnetdf=final3
-Jobnetdf<- Jobnetdf[,c(-4,-3,-5,-7,-8,-9,-10,-11,-12, -13)]
-ggplot(Jobnetdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Jobnet.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-jobindexdf=final3
-jobindexdf<- jobindexdf[,c(-4,-3,-5,-6,-8,-9,-10,-11,-12, -13)]
-ggplot(jobindexdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = jobindex.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-Nytjobdf=final3
-Nytjobdf<- Nytjobdf[,c(-4,-3,-5,-6,-7,-9,-10,-11,-12, -13)]
-ggplot(Nytjobdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Nyt.job.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-Kontantdf=final3
-Kontantdf<- Kontantdf[,c(-4,-3,-5,-6,-7,-8,-10,-11,-12, -13)]
-ggplot(Kontantdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Kontanthjaelp.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-Ledigejobsdf=final3
-Ledigejobsdf<- Ledigejobsdf[,c(-4,-3,-5,-6,-7,-8,-9,-11,-12, -13)]
-ggplot(Ledigejobsdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Ledige.jobs.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-CVdf=final3
-CVdf<- CVdf[,c(-4,-3,-5,-6,-7,-8,-9,-10,-12, -13)]
-ggplot(CVdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = CV.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-dagpengedf=final3
-dagpengedf<- dagpengedf[,c(-4,-3,-5,-6,-7,-8,-9,-10,-11, -13)]
-ggplot(dagpengedf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = dagpenge.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
-jobansogningdf=final3
-jobansogningdf<- jobansogningdf[,c(-3,-4,-5,-6,-7,-8,-9,-10,-11,-12)]
-ggplot(jobansogningdf, aes(x = as.Date(dates))) + 
-  geom_line(aes(y = Jobansogning.Interst.over.time.), colour="blue") + 
-  geom_line(aes(y = UnemRate), colour = "grey") + 
-  ylab(label="Index") + 
-  xlab("Date")
-
 # plotting the words in small graphs in one image.
 
 df5 = final3
-df5<- df5[,c(-14)]
+df5<- df5[,c(-13)]
 df5 = select(df5, -c(X)) # maybe also X.1, 
 df5 = gather(df5, indicator, value, -dates)
 df6<- merge(df5, final3, by="dates")
-df6<-df6[,c(-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15)]
+df6<-df6[,c(-5,-6,-7,-8,-9,-10,-11,-12)]
 
 
 library("ggplot")
@@ -263,6 +171,93 @@ p = ggplot(df6, aes(x = as.Date(dates), y = value))
 p + geom_smooth() + facet_wrap(~ indicator)+ 
   geom_smooth(aes(y=UnemRate), colour="red")
 #here we purely see the overal trend, not the short term trends.
+
+# plotting the words with the indexed unemployment. This might be possible in a simpler way, however I feel that for us it is more practical to focus on getting things to work. Not on the most efficient code.
+
+Jobdf= final3
+Jobdf<- Jobdf[,c(-4,-5,-6,-7,-8,-9,-10,-11,-12)]
+ggplot(Jobdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Ledigedf=final3
+Ledigedf<- Ledigedf[,c(-3,-5,-6,-7,-8,-9,-10,-11,-12)]
+ggplot(Ledigedf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Jobnetdf=final3
+Jobnetdf<- Jobnetdf[,c(-4,-3,-6,-7,-8,-9,-10,-11,-12)]
+ggplot(Jobnetdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobnet.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+jobindexdf=final3
+jobindexdf<- jobindexdf[,c(-4,-3,-5,-7,-8,-9,-10,-11,-12)]
+ggplot(jobindexdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = jobindex.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Nytjobdf=final3
+Nytjobdf<- Nytjobdf[,c(-4,-3,-5,-6,-8,-9,-10,-11,-12)]
+ggplot(Nytjobdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Nyt.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+#seems to have an inverse relationship. 
+
+Kontantdf=final3
+Kontantdf<- Kontantdf[,c(-4,-3,-5,-6,-7,-9,-10,-11,-12)]
+ggplot(Kontantdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Kontanthjaelp.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+Ledigejobsdf=final3
+Ledigejobsdf<- Ledigejobsdf[,c(-4,-3,-5,-6,-7,-8,-10,-11,-12)]
+ggplot(Ledigejobsdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.jobs.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+#inverse relatonship
+
+
+CVdf=final3
+CVdf<- CVdf[,c(-4,-3,-5,-6,-7,-8,-9,-11,-12)]
+ggplot(CVdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = CV.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+dagpengedf=final3
+dagpengedf<- dagpengedf[,c(-4,-3,-5,-6,-7,-8,-9,-10,-12)]
+ggplot(dagpengedf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = dagpenge.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+jobansogningdf=final3
+jobansogningdf<- jobansogningdf[,c(-3,-4,-5,-6,-7,-8,-9,-10,-11)]
+ggplot(jobansogningdf, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobansogning.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+
 
 
 ######################################
@@ -301,7 +296,6 @@ head(unemployment.data)
 
 
 ## Plot
-## Something goes wrong with the index
 unemployment.data = unemployment.data %>% 
   mutate(
     unemployment.index = scale(unemployment.index * (-1)),
@@ -315,9 +309,11 @@ head(unemployment.data)
 ## Plot
 p = ggplot(unemployment.data, aes(x = dates, y = actual.unemployment, group = index, colour = index))
 p + geom_line()  + theme_minimal()
+#The part of the graph that is beneath the actual unem: maybe due to CV. It has a extreme drop between 2010-2012
+
 
 ############
-# Regressions (NOTE: maybe use the unindexed unemployment, so that we can use it in the actual prediction of the unemployment.)
+# Regressions
 # First I regress all the variables, including the ones we deleted
 reg1 = lm(UnemRate ~ Job.Interst.over.time. + Jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time. + Ofir.Interst.over.time.+Jobportalen.Interst.over.time. + Jobsogning.Interst.over.time., data=merged.data16) 
 summary(reg1)
@@ -332,7 +328,7 @@ reg3 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.job.Interst.over.time. + jo
 summary(reg3)
 
 # Trying to make an index with only significant variables.
-final3.2=final3[, c(-4,-6,-8,-9,-10,-12)]
+final3.2=final3[, c(-5,-7,-8,-9,-11)]
 df3.2 = final3.2
 df3.2 = select(df3.2, -c(X)) # maybe also X.1, 
 df3.2 = gather(df3.2, indicator, value, -dates)
@@ -363,7 +359,6 @@ head(unemployment.data.2)
 
 
 ## Plot
-## Something goes wrong with the index
 unemployment.data.2 = unemployment.data.2 %>% 
   mutate(
     unemployment.index.2 = scale(unemployment.index.2 * (-1)),
@@ -373,10 +368,12 @@ unemployment.data.2 = unemployment.data.2 %>% gather(index, actual.unemployment,
 head(unemployment.data.2)
 
 
-
 ## Plot
 p = ggplot(unemployment.data.2, aes(x = dates, y = actual.unemployment, group = index, colour = index))
 p + geom_smooth()  + theme_minimal()
+#Our original graph of the prediction with all variables we selected seems to be more accurate than this one.
+
+
 
 
 ##Prediction
