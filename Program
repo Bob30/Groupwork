@@ -8,7 +8,7 @@ library("devtools")
 
 # loading files
 #loading CV
-cv.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/5ba8002ea1e47198c4033824b6c40b29cf618f2e/CV.final.csv")
+cv.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/12f522d1b128b49091eeccd1965afb1968318402/CV.finalCorrect.csv")
 dagpenge.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/dagpenge.final.csv")
 job.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/job.final.csv")
 jobansogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobansogning.final.csv")
