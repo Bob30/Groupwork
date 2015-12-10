@@ -102,6 +102,26 @@ merged.data16=merged.data15
 #####################
 
 summary(merged.data16)
+##Find the dates where the different variables peak/have maximum
+jobportalen.max <- merged.data16[which.max(merged.data16[,"Jobportalen.Interst.over.time."]),"dates"]
+ofir.max <- merged.data16[which.max(merged.data16[,"Ofir.Interst.over.time."]),"dates"]
+job.max <- merged.data16[which.max(merged.data16[,"Job.Interst.over.time."]),"dates"]
+jobs.max <- merged.data16[which.max(merged.data16[,"Jobs.Interst.over.time."]),"dates"]
+ledige.job.max <- merged.data16[which.max(merged.data16[,"Ledige.job.Interst.over.time."]),"dates"]
+jobnet.max <- merged.data16[which.max(merged.data16[,"Jobnet.Interst.over.time."]),"dates"]
+jobindex.max <- merged.data16[which.max(merged.data16[,"jobindex.Interst.over.time."]),"dates"]
+nytjob.max <- merged.data16[which.max(merged.data16[,"Nyt.job.Interst.over.time."]),"dates"]
+kontanthjaelp.max <- merged.data16[which.max(merged.data16[,"Kontanthjaelp.Interst.over.time."]),"dates"]
+ledige.jobs.max <- merged.data16[which.max(merged.data16[,"Ledige.jobs.Interst.over.time."]),"dates"]
+cv.max <- merged.data16[which.max(merged.data16[,"CV.Interst.over.time."]),"dates"]
+dagpenge.max <- merged.data16[which.max(merged.data16[,"dagpenge.Interst.over.time."]),"dates"]
+jobsogning.max <- merged.data16[which.max(merged.data16[,"Jobsogning.Interst.over.time."]),"dates"]
+jobansogning.max <- merged.data16[which.max(merged.data16[,"Jobansogning.Interst.over.time."]),"dates"]
+unemrate.max <- merged.data16[which.max(merged.data16[,"UnemRate"]),"dates"]
+
+max.dates <- data.frame(jobportalen.max,ofir.max,job.max,jobs.max,ledige.job.max, jobnet.max,jobindex.max,nytjob.max, kontanthjaelp.max, ledige.jobs.max, cv.max, dagpenge.max, jobsogning.max, jobansogning.max, unemrate.max)
+
+###################
 
 
 library(tidyr)
