@@ -353,52 +353,49 @@ p + geom_smooth()  + theme_minimal()
 #Our original graph of the prediction with all variables we selected seems to be more accurate than this one.
 
 
-## Index with job, nyt job, ledige jobs inverse because our we can't predict as of now> the unemployment trend predicts the google search now.
-## Exclude dagpenge, exclude kontant
-## both needs to be done.
-final3.2$Y      <- c("100")
-final3.2$Y=as.integer(final3.2$Y)  
-final3.2$Inverse.Job <- (final3.2$Y-final3.2$Job.Interst.over.time.)
+## Exclude dagpenge, exclude kontant job, nyt job, ledige jobs inverse
+Delete.final= c("Job.Interst.over.time.", "Nyt.job.Interst.over.time.", "dagpenge.Interst.over.time.","Kontanthjaelp.Interst.over.time.", "Ledige.job.Interst.over.time.", "Ledige.jobs.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
+final3.3= final3[, !names(final3) %in% Delete.final, drop = F]
 
-df3.2 = final3.2
-df3.2 = select(df3.2, -c(X)) # maybe also X.1, 
-df3.2 = gather(df3.2, indicator, value, -dates)
+df3.3 = final3.3
+df3.3 = select(df3.3, -c(X)) # maybe also X.1, 
+df3.3 = gather(df3.3, indicator, value, -dates)
 
-df3.2 <- unique(df3.2)
+df3.3 <- unique(df3.3)
 
-df.wide2 = df3.2 %>% spread(indicator, value)
-df.wide2 = df.wide2[complete.cases(df.wide2), ]
-df.wide2$dates<- as.Date(df.wide2$dates, "%Y-%m-%d")
-head(df.wide2)
+df.wide3 = df3.3 %>% spread(indicator, value)
+df.wide3 = df.wide3[complete.cases(df.wide2), ]
+df.wide3$dates<- as.Date(df.wide3$dates, "%Y-%m-%d")
+head(df.wide3)
 
 #PCA (fjerner dates og den reelle unemployment rate)
-pca.2 = princomp(select(df.wide2, -c(dates,UnemRate)))
-summary(pca.2)
+pca.3 = princomp(select(df.wide3, -c(dates,UnemRate)))
+summary(pca.3)
 
 #Creating an index
-unemployment.index.2 = predict(pca.2)[, 1]
-unemployment.index.2 = data.frame(unemployment.index.2 = unemployment.index.2, dates = df.wide2$dates)
+unemployment.index.3 = predict(pca.3)[, 1]
+unemployment.index.3 = data.frame(unemployment.index.3 = unemployment.index.3, dates = df.wide3$dates)
 
 
 # Compare to unemployment rate
 #install.packages("lubridate")
 library("lubridate")
 # Unemploymentrate = df.wide %>% select(dates, UnemRate)
-unemployment.data.2 = full_join(unemployment.index.2, unem)
+unemployment.data.3 = full_join(unemployment.index.3, unem)
 
-head(unemployment.data.2)
+head(unemployment.data.3)
 
 
 ## Plot
-unemployment.data.2 = unemployment.data.2 %>% 
+unemployment.data.3 = unemployment.data.3 %>% 
   mutate(
-    unemployment.index.2 = scale(unemployment.index.2 * (-1)),
+    unemployment.index.3 = scale(unemployment.index.3 * (-1)),
     value = scale(value)
   )
-unemployment.data.2 = unemployment.data.2 %>% gather(index, actual.unemployment, -dates)
-head(unemployment.data.2)
+unemployment.data.3 = unemployment.data.3 %>% gather(index, actual.unemployment, -dates)
+head(unemployment.data.3)
 
 
 ## Plot
-p = ggplot(unemployment.data.2, aes(x = dates, y = actual.unemployment, group = index, colour = index))
+p = ggplot(unemployment.data.3, aes(x = dates, y = actual.unemployment, group = index, colour = index))
 p + geom_smooth()  + theme_minimal()
