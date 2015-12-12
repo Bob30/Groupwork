@@ -15,7 +15,6 @@ jobnet.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a
 jobportalen.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobportalen.final.csv")
 jobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobs.final.csv")
 jobsogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobsogning.final.csv")
-jobzonen.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobzonen.final.csv")
 kontanthjaelp.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/kontanthjaelp.final.csv")
 ledigejob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520job.final.csv")
 ledigejobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520jobs.final.csv")
