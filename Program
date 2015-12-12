@@ -23,34 +23,27 @@ ofir.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d
 
 ## Loads the actual unemployment rate from Statistics Denmark
 library("dkstat")
-dst_search(string = "AUS08", field = "text")
+dst_search(string = "AUP01", field = "text")
 
-dst_meta("AUS08", lang="en") 
+dst_meta("AUP01", lang="en") 
 
-AUS08 = dst_get_data(table = "AUS08", OMRÅDE = "All Denmark", 
-                     SAESONFAK = "Enumerated actual figures  in percent of the labour force", 
+AUP01 = dst_get_data(table = "AUP01", OMRÅDE = "All Denmark", 
+                     ALDER = "Age, total",
+                     KØN = "Total",
                      Tid = "*",
                      lang='en')
-AUS08
+AUP01
 
-# we don't need the column 'område' 
-AUS08 <- AUS08[,c(-1)]
-# or the column 'saesonfak'
-AUS08 <- AUS08[,c(-1)]
+# we don't need the column 'omrÃ¥de' 
+AUP01_delete <- c("OMRÅDE", "KØN", "ALDER")
+AUP01b <- AUP01[, ! names(AUP01) %in% AUP01_delete, drop = F]
 
-# Add row to AUS08 so it is possible to merge with the keywords
-AUS08 <- cbind(X=1:nrow(AUS08), AUS08)
-
-# Export the AUS08
-#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/AUS08.csv", x=AUS08)
-
+#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/AUP01b.csv", x=AUP01b)
 ## The unemployment rate is converted to index numbers in excel, 
-# where the highest unemployment rate is 6.9
-UnemIndex.1 = read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/UnemploymentIndex.csv")
-
+# where the highest unemployment rate is 6.6
+UnemIndex.1 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/a8cb01f53511bfc15fbbf22fde8807a93769f137/AUP01_Index.csv", sep=";")
+# Add row to AUS08 so it is possible to merge with the keywords
 UnemIndex.1 <- cbind(X=1:nrow(UnemIndex.1), UnemIndex.1)
-throwout <- c("Var.2", "TID")
-UnemIndex.1 <- UnemIndex.1[, ! names(UnemIndex.1) %in% throwout, drop = F]
 
 #################################
 library("plyr")
@@ -83,11 +76,13 @@ names(merged.data13)
 merged.data14 <- left_join(merged.data13, UnemIndex.1, by="X")
 
 merged.data14$dates <- as.Date(merged.data14$Month, "%m/%d/%y") 
-merged.data15 <- merged.data14[,c(1,19,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18)] # move the date to the first column and deletes the month-column
-merged.data15=rename(merged.data15, c("X.3"="UnemRate"))
+month_out <- c("Month", "month")
+merged.data14.b <- merged.data14[, ! names(merged.data14) %in% month_out, drop = F]
+
+merged.data15 <- merged.data14.b[,c(1,16,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17)] # move the date to the first column and deletes the month-column
 
 #exports the data frame
-#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/data.final3.csv", x=merged.data15)
+#write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/data.final4.csv", x=merged.data15)
 ########################################################################################################################################################
 
 # Start from here
@@ -249,9 +244,10 @@ ggplot(final3, aes(x = as.Date(dates))) +
 
 ######################################
 
-unem=read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/e5963dee7d567dbd2c44c952658e9a6586d26ed9/AUS08.csv")
-unem<-unem[,c (-1,-2)]
-colnames(unem)[1] <- "dates"
+unem=read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/a8cb01f53511bfc15fbbf22fde8807a93769f137/AUP01b.csv")
+unem<-unem[,c (-1)]
+colnames(unem)[2] <- "dates"
+unem <-unem[,c(2,1)]
 
 # Trying to make an index
 df.wide = df3 %>% spread(indicator, value)
@@ -297,14 +293,14 @@ p + geom_smooth()  + theme_minimal()
 ############
 # Regressions
 #first, I regress only the variables that we kept in final3.
-reg2 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+reg1 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+summary(reg1)
+
+# second, I regress the significant variables
+reg2 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + Ledige.job.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + CV.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
 summary(reg2)
 
-# second, I regress the significant variables (made a bit sloppy, so we should doublecheck)
-reg3 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.job.Interst.over.time. + jobindex.Interst.over.time. + CV.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
-summary(reg3)
-
-# Trying to make an index with only significant variables.
+# Make an index with only significant variables.
 Delete.unsig= c("Ledige.job.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
 final3.2= final3[, !names(final3) %in% Delete.unsig, drop = F]
 df3.2 = final3.2
@@ -318,7 +314,7 @@ df.wide2 = df.wide2[complete.cases(df.wide2), ]
 df.wide2$dates<- as.Date(df.wide2$dates, "%Y-%m-%d")
 head(df.wide2)
 
-#PCA (fjerner dates og den reelle unemployment rate)
+#PCA (delete dates and the actual unemployment rate)
 pca.2 = princomp(select(df.wide2, -c(dates,UnemRate)))
 summary(pca.2)
 
@@ -367,7 +363,7 @@ df.wide3 = df.wide3[complete.cases(df.wide2), ]
 df.wide3$dates<- as.Date(df.wide3$dates, "%Y-%m-%d")
 head(df.wide3)
 
-#PCA (fjerner dates og den reelle unemployment rate)
+#PCA (delete dates and the actual unemployment rate)
 pca.3 = princomp(select(df.wide3, -c(dates,UnemRate)))
 summary(pca.3)
 
