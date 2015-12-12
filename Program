@@ -246,8 +246,7 @@ ggplot(final3, aes(x = as.Date(dates))) +
 
 unem=read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/a8cb01f53511bfc15fbbf22fde8807a93769f137/AUP01b.csv")
 unem<-unem[,c (-1)]
-colnames(unem)[2] <- "dates"
-unem <-unem[,c(2,1)]
+colnames(unem)[1] <- "dates"
 
 # Trying to make an index
 df.wide = df3 %>% spread(indicator, value)
