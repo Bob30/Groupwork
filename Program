@@ -300,7 +300,7 @@ reg2 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + L
 summary(reg2)
 
 # Make an index with only significant variables.
-Delete.unsig= c("Ledige.job.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
+Delete.unsig= c("Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
 final3.2= final3[, !names(final3) %in% Delete.unsig, drop = F]
 df3.2 = final3.2
 df3.2 = select(df3.2, -c(X)) # maybe also X.1, 
@@ -393,3 +393,4 @@ head(unemployment.data.3)
 ## Plot
 p = ggplot(unemployment.data.3, aes(x = dates, y = actual.unemployment, group = index, colour = index))
 p + geom_smooth()  + theme_minimal()
+
