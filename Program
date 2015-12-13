@@ -278,6 +278,10 @@ unemployment.data = unemployment.data %>%
     unemployment.index = scale(unemployment.index * (-1)),
     value = scale(value)
   )
+#Makes a lag
+unemployment.data$YLag=lag(unemployment.data$value)
+unemployment.data$YLag2=lag(unemployment.data$YLag)
+unemployment.data$YLag3=lag(unemployment.data$YLag2)
 unemployment.data = unemployment.data %>% gather(index, actual.unemployment, -dates)
 head(unemployment.data)
 
