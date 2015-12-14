@@ -397,6 +397,7 @@ p = ggplot(unemployment.data.3, aes(x = dates, y = value, group = unemployment.i
 p + geom_smooth()  + theme_minimal()
 
 
+
 ####################################################################################
 #Forecasting
 
@@ -501,6 +502,7 @@ p= ggplot() +
   geom_smooth(data=df.prediction.AR, aes(x=dates, y=prediction.AR), color='blue')
 + theme_minimal()
 plot(p)
+
 
 
 
