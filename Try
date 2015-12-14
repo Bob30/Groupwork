@@ -1,0 +1,449 @@
+## The folliwing code loads the actual unemployment rate from Statistics Denmark. Do not run this code, otherwise the result will be different from our orignial scraping.
+
+library("dkstat")
+dst_search(string = "AUP01", field = "text")
+
+dst_meta("AUP01", lang="en") 
+
+AUP01 = dst_get_data(table = "AUP01", OMRÅDE = "All Denmark", 
+                     ALDER = "Age, total",
+                     KØN = "Total",
+                     Tid = "*",
+                     lang='en')
+AUP01
+
+# We don't need the column 'omrÃ¥de'. 
+AUP01_delete <- c("OMRÅDE", "KØN", "ALDER")
+AUP01b <- AUP01[, ! names(AUP01) %in% AUP01_delete, drop = F]
+
+# Now we export it and use this dataframe as the unemployment rate for our entire project.
+
+# Start here!
+
+library("dplyr")
+library("readr")
+library("stringr")
+library("ggplot2")
+library("devtools")
+library("plyr")
+library("tidyr")
+library("dplyr")
+library("lubridate")
+
+# Loading our datafiles
+cv.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/829976e5a515bb84735e5ea96ee5ba93909d96c3/CV.finacorrectl.csv")
+dagpenge.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/dagpenge.final.csv")
+dagpenge.1 <- dagpenge.1[-c(108), ] # deletes the 108. row that is a copy of row 107 (the date appears twice)
+job.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/job.final.csv")
+jobansogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobansogning.final.csv")
+jobindex.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobindex.final.csv")
+jobnet.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/Jobnet.final.csv")
+jobportalen.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobportalen.final.csv")
+jobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobs.final.csv")
+jobsogning.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/jobsogning.final.csv")
+kontanthjaelp.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/kontanthjaelp.final.csv")
+ledigejob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520job.final.csv")
+ledigejobs.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ledige%2520jobs.final.csv")
+nytjob.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/nyt%2520job.final.csv")
+ofir.1<-read.csv2("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/b7adeedea4268a0b590d83f47c82267101383832/ofir.final.csv")
+
+# The unemployment rate is converted to index numbers in excel, where the highest unemployment rate is 6.6.
+UnemIndex.1 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/a8cb01f53511bfc15fbbf22fde8807a93769f137/AUP01_Index.csv", sep=";")
+# Add row to AUS08 so it is possible to merge with the keywords
+UnemIndex.1 <- cbind(X=1:nrow(UnemIndex.1), UnemIndex.1)
+
+# The following code merges data together by Month (CV has another date format than the rest, so it is merged by X)
+merged.data1 <- merge(cv.1, dagpenge.1, by="X")
+merged.data1 <- merged.data1[,c(-2)]
+merged.data1 = rename(merged.data1, c("Month.y"="Month"))
+merged.data2 <- merge(jobsogning.1, jobansogning.1, by="Month")
+merged.data3 <- merge(kontanthjaelp.1, ledigejobs.1, by="Month")
+merged.data4 <- merge(ledigejob.1, jobnet.1, by="Month")
+merged.data5 <- merge(jobindex.1, nytjob.1, by="Month")
+merged.data6 <- merge(jobportalen.1, ofir.1, by="Month")
+merged.data7 <- merge(job.1, jobs.1, by="Month")
+merged.data8 <- merge(merged.data1, merged.data2, by="Month")
+merged.data9 <- merge(merged.data3, merged.data8, by="Month")
+merged.data10 <- merge(merged.data4, merged.data5, by="Month")
+merged.data11 <- merge(merged.data6, merged.data7, by="Month")
+merged.data12 <- merge(merged.data11, merged.data10, by="Month")
+merged.data13 <- merge(merged.data12, merged.data9, by="Month")
+
+# The X-columns appears too many times, so we delete the all X except for one.
+cols.dont.want <- c("X.x.x.x", "X.y.x.x", "X.x.y.x", "X.y.y.x", "X.x.x.y", "X.y.x.y", "X.x.y.y", "X.y.y.y", "X.y", "X.x.x", "X.y.x", "X.x.y", "X.y.y") # if you want to remove multiple columns
+merged.data13 <- merged.data13[, ! names(merged.data13) %in% cols.dont.want, drop = F]
+
+# Reorder the columns
+merged.data13 <- merged.data13[,c(12,1,2,3,4,5,6,7,8,9,10,11,13,14,15,16)] 
+names(merged.data13)
+merged.data14 <- left_join(merged.data13, UnemIndex.1, by="X")
+merged.data14$dates <- as.Date(merged.data14$Month, "%m/%d/%y") 
+month_out <- c("Month")
+merged.data14.b <- merged.data14[, ! names(merged.data14) %in% month_out, drop = F]
+merged.data15 <- merged.data14.b[,c(1,16,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17)] # move the date to the first column and deletes the month-column
+merged.data16=merged.data15
+summary(merged.data16)
+
+##Find the dates where the different variables peak/have maximum
+jobportalen.max <- merged.data16[which.max(merged.data16[,"Jobportalen.Interst.over.time."]),"dates"]
+ofir.max <- merged.data16[which.max(merged.data16[,"Ofir.Interst.over.time."]),"dates"]
+job.max <- merged.data16[which.max(merged.data16[,"Job.Interst.over.time."]),"dates"]
+jobs.max <- merged.data16[which.max(merged.data16[,"Jobs.Interst.over.time."]),"dates"]
+ledige.job.max <- merged.data16[which.max(merged.data16[,"Ledige.job.Interst.over.time."]),"dates"]
+jobnet.max <- merged.data16[which.max(merged.data16[,"Jobnet.Interst.over.time."]),"dates"]
+jobindex.max <- merged.data16[which.max(merged.data16[,"jobindex.Interst.over.time."]),"dates"]
+nytjob.max <- merged.data16[which.max(merged.data16[,"Nyt.job.Interst.over.time."]),"dates"]
+kontanthjaelp.max <- merged.data16[which.max(merged.data16[,"Kontanthjaelp.Interst.over.time."]),"dates"]
+ledige.jobs.max <- merged.data16[which.max(merged.data16[,"Ledige.jobs.Interst.over.time."]),"dates"]
+cv.max <- merged.data16[which.max(merged.data16[,"CV.Interst.over.time."]),"dates"]
+dagpenge.max <- merged.data16[which.max(merged.data16[,"dagpenge.Interst.over.time."]),"dates"]
+jobsogning.max <- merged.data16[which.max(merged.data16[,"Jobsogning.Interst.over.time."]),"dates"]
+jobansogning.max <- merged.data16[which.max(merged.data16[,"Jobansogning.Interst.over.time."]),"dates"]
+unemrate.max <- merged.data16[which.max(merged.data16[,"UnemRate"]),"dates"]
+
+max.dates <- data.frame(jobportalen.max,ofir.max,job.max,jobs.max,ledige.job.max, jobnet.max,jobindex.max,nytjob.max, kontanthjaelp.max, ledige.jobs.max, cv.max, dagpenge.max, jobsogning.max, jobansogning.max, unemrate.max)
+
+## Plots all the variables in one graph
+df = merged.data16
+df = select(df, -c(X)) # maybe also X.1, 
+df = gather(df, indicator, value, -dates)
+
+p = ggplot(df, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+## The variable Jobportalen has a lot of zeroes, so we delete the variable.
+Delete.Jobportalen= c("Jobportalen.Interst.over.time.")
+final2= merged.data16[, !names(merged.data16) %in% Delete.Jobportalen, drop = F]
+# plot it again
+df2 = final2
+df2 = select(df2, -c(X)) # maybe also X.1, 
+df2 = gather(df2, indicator, value, -dates)
+
+p = ggplot(df2, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+## Ofir and jobsogning is decreasing over timer, so we delete as well.
+## The variable Jobs has one observation (see PDF for the reason) that is extremely high, therefore lowering the relative value of the other observations.
+Delete.ofjobs= c("Ofir.Interst.over.time.", "Jobsogning.Interst.over.time.", "Jobs.Interst.over.time.")
+final3= final2[, !names(final2) %in% Delete.ofjobs, drop = F]
+df3 = final3
+df3 = select(df3, -c(X)) 
+df3 = gather(df3, indicator, value, -dates)
+df3 <- unique(df3)
+
+p = ggplot(df3, aes(x = as.Date(dates), y = value, colour = indicator))
+p + geom_line()
+
+# plotting the words in small graphs in one image.
+df5 = final3
+Delete.unemrate= c("UnemRate","X.1")
+df5= df5[, !names(df5) %in% Delete.unemrate, drop = F]
+df5 = select(df5, -c(X)) # maybe also X.1, 
+df5 = gather(df5, indicator, value, -dates)
+df6<- merge(df5, final3, by="dates")
+Delete.all= c("Jobportalen.Interst.over.time.", "Job.Interst.over.time.", "Jobs.Interst.over.time.", "Ledige.job.Interst.over.time.", "Jobnet.Interst.over.time.", "jobindex.Interst.over.time.", "Nyt.job.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "Ledige.jobs.Interst.over.time.", "CV.Interst.over.time.", "dagpenge.Interst.over.time.", "Jobansogning.Interst.over.time.")
+df6b= df6[, !names(df6) %in% Delete.all, drop = F]
+
+p = ggplot(df6b, aes(x = as.Date(dates), y = value))
+p + geom_smooth() + facet_wrap(~ indicator)+ 
+  geom_smooth(aes(y=UnemRate), colour="red")
+#Here we see the overal trend, where short term trends are smoothened.
+
+#Plotting the words with the indexed unemployment. 
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobnet.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = jobindex.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Nyt.job.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+#seems to have an inverse relationship. 
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Kontanthjaelp.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Ledige.jobs.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+#inverse relatonship
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = CV.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = dagpenge.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+ggplot(final3, aes(x = as.Date(dates))) + 
+  geom_line(aes(y = Jobansogning.Interst.over.time.), colour="blue") + 
+  geom_line(aes(y = UnemRate), colour = "grey") + 
+  ylab(label="Index") + 
+  xlab("Date")
+
+######################################
+# Loading the non-indexed unemployment rate.
+unem=read_csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/a8cb01f53511bfc15fbbf22fde8807a93769f137/AUP01b.csv")
+unem<-unem[,c (-1)]
+colnames(unem)[1] <- "dates"
+
+# Making an index
+df.wide = df3 %>% spread(indicator, value)
+df.wide = df.wide[complete.cases(df.wide), ]
+df.wide$dates<- as.Date(df.wide$dates, "%Y-%m-%d")
+head(df.wide)
+pca = princomp(select(df.wide, -c(dates,UnemRate)))
+summary(pca)
+unemployment.index = predict(pca)[, 1]
+unemployment.index = data.frame(unemployment.index = unemployment.index, dates = df.wide$dates)
+
+# Comparing the index to unemployment rate.
+# Unemploymentrate = df.wide %>% select(dates, UnemRate)
+unemployment.data = full_join(unemployment.index, unem)
+head(unemployment.data)
+
+## Plot
+unemployment.data = unemployment.data %>% 
+  mutate(
+    unemployment.index = scale(unemployment.index * (-1)),
+    value = scale(value)
+  )
+unemployment.data = unemployment.data %>% gather(index, actual.unemployment, -dates)
+head(unemployment.data)
+
+p = ggplot(unemployment.data, aes(x = dates, y = actual.unemployment, group = index, colour = index))
+p + geom_smooth()  + theme_minimal()
+#The part of the graph that is beneath the actual unem: maybe due to CV. It has a extreme drop between 2010-2012
+
+############
+
+# Regressions
+#First, we regress only the variables that we kept after our inital selection.
+reg1 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + Ledige.job.Interst.over.time. + Jobnet.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + Kontanthjaelp.Interst.over.time. + Ledige.jobs.Interst.over.time. +CV.Interst.over.time. + dagpenge.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+summary(reg1)
+
+#Second, we regress only the significant variables.
+reg2 = lm(UnemRate ~ Job.Interst.over.time. + Ledige.jobs.Interst.over.time. + Ledige.job.Interst.over.time. + jobindex.Interst.over.time. + Nyt.job.Interst.over.time. + CV.Interst.over.time. + Jobansogning.Interst.over.time., data=final3) 
+summary(reg2)
+
+# In order to improve our old index we make an index with only significant variables.
+# First we make sure we can use the data.
+Delete.unsig= c( "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
+final3.2= final3[, !names(final3) %in% Delete.unsig, drop = F]
+df3.2 = final3.2
+df3.2 = select(df3.2, -c(X, X.1, UnemRate)) 
+df3.2 <- unique(df3.2)
+df.wide2 = df3.2 
+df.wide2 = df.wide2[complete.cases(df.wide2), ]
+df.wide2$dates<- as.Date(df.wide2$dates, "%Y-%m-%d")
+head(df.wide2)
+pca.2 = princomp(select(df.wide2, -c(dates)))
+summary(pca.2)
+
+#Then we create an index
+unemployment.index.2 = predict(pca.2)[, 1]
+unemployment.index.2 = data.frame(unemployment.index.2 = unemployment.index.2, dates = df.wide2$dates)
+
+
+#We compare it to the unemployment rate.
+unemployment.data.2 = full_join(unemployment.index.2, unem)
+head(unemployment.data.2)
+
+
+## Plot
+unemployment.data.2 = unemployment.data.2 %>% 
+  mutate(
+    unemployment.index.2 = scale(unemployment.index.2 * (-1)),
+    value = scale(value)
+  )
+unemployment.data.2 = unemployment.data.2 %>% gather(index, actual.unemployment, -dates)
+head(unemployment.data.2)
+
+p = ggplot(unemployment.data.2, aes(x = dates, y = actual.unemployment, group = index, colour = index))
+p + geom_smooth()  + theme_minimal()
+#Our original graph of the prediction with all variables we selected seems to be more accurate than this one.
+
+
+#We now try to make another index 3, where we exclude dagpenge, exclude kontant job, nyt job, ledige jobs inverse
+#We exclude those because they have either an inverse relation or are not moving with the unemployment at all.
+
+#First we make sure we have the right variables.
+Delete.final= c("Job.Interst.over.time.", "Nyt.job.Interst.over.time.", "dagpenge.Interst.over.time.","Kontanthjaelp.Interst.over.time.", "Ledige.job.Interst.over.time.", "Ledige.jobs.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
+final3.3= final3[, !names(final3) %in% Delete.final, drop = F]
+df3.3 = final3.3
+df3.3 = select(df3.3, -c(X, X.1, UnemRate)) # maybe also X.1, 
+df3.3 = gather(df3.3, indicator, value, -dates)
+df3.3 <- unique(df3.3)
+df.wide3 = df3.3 %>% spread(indicator, value)
+df.wide3 = df.wide3[complete.cases(df.wide2), ]
+df.wide3$dates<- as.Date(df.wide3$dates, "%Y-%m-%d")
+head(df.wide3)
+pca.3 = princomp(select(df.wide3, -c(dates)))
+summary(pca.3)
+
+#Then we create an index.
+unemployment.index.3 = predict(pca.3)[, 1]
+unemployment.index.3 = data.frame(unemployment.index.3 = unemployment.index.3, dates = df.wide3$dates)
+
+#Then we compare it to the unemployment rate.
+unemployment.data.3 = full_join(unemployment.index.3, unem)
+head(unemployment.data.3)
+
+## Plot
+unemployment.data.3 = unemployment.data.3 %>% 
+  mutate(
+    unemployment.index.3 = scale(unemployment.index.3 * 1),
+    value = scale(value)
+  )
+unemployment.data.3 = unemployment.data.3 %>% gather(unemployment.index.3, value, -dates)
+head(unemployment.data.3)
+
+p = ggplot(unemployment.data.3, aes(x = dates, y = value, group = unemployment.index.3, colour = unemployment.index.3))
+p + geom_smooth()  + theme_minimal()
+
+
+
+####################################################################################
+#Forecasting
+
+#New dataset - this is used to make a dataframe just with the values
+
+unemployment.data.3.1 = full_join(unemployment.index.2, unem)
+head(unemployment.data.3.1)
+
+
+unemployment.data.3.1 = unemployment.data.3.1 %>% 
+  mutate(
+    unemployment.index.3 = scale(unemployment.index.2*(-1)),
+    value = scale(value)
+  )
+
+df.value=select(unemployment.data.3.1, dates, value)
+unemployment.data.3.1=select(unemployment.data.3.1, dates, value, unemployment.index.3)
+
+
+#Inserts extra timeperiodes to forecast
+dates=as.Date(c("2015-12-01", "2016-01-01", "2016-02-01", "2016-03-01", "2006-04-01", "2016-05-01"))
+unemployment.index.3=c(0, 0, 0, 0, 0, 0)
+#prediction=c(0, 0, 0, 0, 0, 0)
+#XLag=c(0, 0, 0, 0, 0, 0)
+#XLag2=c(0, 0, 0, 0, 0, 0)
+#XLag3=c(0, 0, 0, 0, 0, 0)
+#XLag4=c(0, 0, 0, 0, 0, 0)
+#XLag5=c(0, 0, 0, 0, 0, 0)
+#XLag6=c(0, 0, 0, 0, 0, 0)
+#YLag=c(0, 0, 0, 0, 0, 0)
+#YLag2=c(0, 0, 0, 0, 0, 0)
+#YLag3=c(0, 0, 0, 0, 0, 0)
+value=c(NA, NA, NA, NA, NA, NA)
+
+#df.dates=data.frame(dates, unemployment.index.3, value, YLag, YLag2, YLag3, XLag, XLag2, XLag3, XLag4, XLag5, XLag6, stringsAsFactors = FALSE)
+df.dates=data.frame(dates, unemployment.index.3, value, stringsAsFactors = FALSE)
+
+class(df.dates$dates)
+class(df.dates$YLag)
+
+df.wide5=rbind(unemployment.data.3.1, df.dates)
+
+#Making lags
+df.wide5$YLag=lag(df.wide5$value)
+df.wide5$YLag2=lag(df.wide5$YLag)
+df.wide5$YLag3=lag(df.wide5$YLag2)
+
+df.wide5$XLag=lag(df.wide5$unemployment.index.3)
+df.wide5$XLag2=lag(df.wide5$XLag)
+df.wide5$XLag3=lag(df.wide5$XLag2)
+df.wide5$XLag4=lag(df.wide5$XLag3)
+df.wide5$XLag5=lag(df.wide5$XLag4)
+df.wide5$XLag6=lag(df.wide5$XLag5)
+
+
+#Sets missing values to zero otherwise predictions will not be calculated when there is missing one or more values
+df.wide5$YLag[is.na(df.wide5$YLag)]=0
+df.wide5$YLag2[is.na(df.wide5$YLag2)]=0
+df.wide5$YLag3[is.na(df.wide5$YLag3)]=0
+
+df.wide5$XLag[is.na(df.wide5$XLag)]=0
+df.wide5$XLag2[is.na(df.wide5$XLag2)]=0
+df.wide5$XLag3[is.na(df.wide5$XLag3)]=0
+df.wide5$XLag4[is.na(df.wide5$XLag4)]=0
+df.wide5$XLag5[is.na(df.wide5$XLag5)]=0
+df.wide5$XLag6[is.na(df.wide5$XLag6)]=0
+
+
+#Dont use information before 2007-02-01
+df.wide6=subset(df.wide5, dates>as.Date("2007-02-01"))
+
+
+#Make the regression AR(3) model
+reg1 = lm(value ~ YLag + YLag2 + YLag3, data=df.wide6) 
+summary(reg1)
+#Multiple R-squared:  0.5251,	Adjusted R-squared:  0.5109
+
+#Prediction with the AR(3) model
+df.wide6$prediction.AR=-0.002357+(0.874884*df.wide6$YLag)+(-0.462033*df.wide6$YLag2)+(-0.056229*df.wide6$YLag3)
+df.prediction.AR=select(df.wide6, prediction.AR , dates)
+df.prediction.AR=subset(df.prediction.AR, dates<as.Date("2016-03-01"))
+
+
+#Make the regression with lags from the index
+reg2 = lm(value ~ unemployment.index.3 + XLag + XLag2 + XLag3 + XLag4 + XLag5 + XLag6 , data=df.wide6)
+summary(reg2)
+#Multiple R-squared:  0.8547,	Adjusted R-squared:  0.8441
+
+#Prediction with lags of the index
+#df.wide6$prediction.1=0.001115-(0.106708*df.wide6$unemployment.index.3)-(0.102094*df.wide6$XLag)-(0.126276*df.wide6$XLag2)-(0.139561*df.wide6$XLag3)-(0.208070*df.wide6$XLag4)-(0.200790*df.wide6$XLag5)-(0.145361*df.wide6$XLag6)
+df.wide6$prediction.1=-0.005764+(0.612888*df.wide6$unemployment.index.3)+(0.413494*df.wide6$XLag)-(0.239713*df.wide6$XLag2)-(0.114299*df.wide6$XLag3)+(0.052425*df.wide6$XLag4)-(0.079220*df.wide6$XLag5)+(0.007682*df.wide6$XLag6)
+
+df.prediction.1=select(df.wide6, prediction.1 , dates)
+
+
+df.prediction.2=select(df.wide6, dates, value, prediction.1, prediction.AR)
+sort(df.prediction.2$dates)
+
+
+#Plotting the two predictions against the actual unemployment rate
+p= ggplot() + 
+  geom_smooth(data=df.value, aes(x=dates, y=value), color='green') + 
+  geom_smooth(data=df.prediction.1, aes(x=dates, y=prediction.1), color='red') +
+  geom_smooth(data=df.prediction.AR, aes(x=dates, y=prediction.AR), color='blue')
++ theme_minimal()
+plot(p)
+
+
+
+
+
+
+
