@@ -306,8 +306,8 @@ summary(reg2)
 Delete.unsig= c("Ledige.job.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
 final3.2= final3[, !names(final3) %in% Delete.unsig, drop = F]
 df3.2 = final3.2
-df3.2 = select(df3.2, -c(X, X.1)) # maybe also X.1, 
-#df3.2 = gather(df3.2, indicator, value, -dates)
+df3.2 = select(df3.2, -c(X)) # maybe also X.1, 
+df3.2 = gather(df3.2, indicator, value, -dates)
 
 df3.2 <- unique(df3.2)
 
@@ -349,14 +349,16 @@ p = ggplot(unemployment.data.2, aes(x = dates, y = actual.unemployment, group = 
 p + geom_smooth()  + theme_minimal()
 #Our original graph of the prediction with all variables we selected seems to be more accurate than this one.
 
-
+######################################################################
+#Index 3
 ## Exclude dagpenge, exclude kontant job, nyt job, ledige jobs inverse
 Delete.final= c("Job.Interst.over.time.", "Nyt.job.Interst.over.time.", "dagpenge.Interst.over.time.","Kontanthjaelp.Interst.over.time.", "Ledige.job.Interst.over.time.", "Ledige.jobs.Interst.over.time.", "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
+
 final3.3= final3[, !names(final3) %in% Delete.final, drop = F]
 
 df3.3 = final3.3
-df3.3 = select(df3.3, -c(X, X.1)) # maybe also X.1, 
-#df3.3 = gather(df3.3, indicator, value, -dates)
+df3.3 = select(df3.3, -c(X)) # maybe also X.1, 
+df3.3 = gather(df3.3, indicator, value, -dates)
 
 df3.3 <- unique(df3.3)
 
@@ -389,54 +391,118 @@ unemployment.data.3 = unemployment.data.3 %>%
     unemployment.index.3 = scale(unemployment.index.3 * (-1)),
     value = scale(value)
   )
-unemployment.data.3$YLag=lag(unemployment.data.3$value)
-#Include a lag
-reg_AR1 = lm(value ~ YLag, data=unemployment.data.3) 
-summary(reg_AR1)
-
-unemployment.data.3 = unemployment.data.3 %>% gather(index, actual.unemployment, -dates)
+unemployment.data.3 = unemployment.data.3 %>% gather(unemployment.index.3, value, -dates)
 head(unemployment.data.3)
 
-
 ## Plot
-p = ggplot(unemployment.data.3, aes(x = dates, y = actual.unemployment, group = index, colour = index))
+p = ggplot(unemployment.data.3, aes(x = dates, y = value, group = unemployment.index.3, colour = unemployment.index.3))
 p + geom_smooth()  + theme_minimal()
 
 
+####################################################################################
+#Forecasting
+
+#New dataset - this is used to make a dataframe just with the values
+
+unemployment.data.3.1 = full_join(unemployment.index.2, unem)
+head(unemployment.data.3.1)
 
 
-## Trying to make a model to predict
-#Try to use a lag of the index for the prediction
-df.wide4 = unemployment.data.3 %>% spread(index, actual.unemployment)
-df.wide4 = df.wide4[complete.cases(df.wide4), ]
-df.wide4$dates<- as.Date(df.wide3$dates, "%Y-%m-%d")
-head(df.wide4)
+unemployment.data.3.1 = unemployment.data.3.1 %>% 
+  mutate(
+    unemployment.index.3 = scale(unemployment.index.2)*(-1),
+    value = scale(value)
+  )
 
-#Use 6 lags
-df.wide4$YLag=lag(df.wide4$unemployment.index.3)
-df.wide4$YLag2=lag(df.wide4$YLag)
-df.wide4$YLag3=lag(df.wide4$YLag2)
-df.wide4$YLag4=lag(df.wide4$YLag3)
-df.wide4$YLag5=lag(df.wide4$YLag4)
-df.wide4$YLag6=lag(df.wide4$YLag5)
+df.value=select(unemployment.data.3.1, dates, value)
+unemployment.data.3.1=select(unemployment.data.3.1, dates, value, unemployment.index.3)
 
-#Making a regression model to get the coefficeints
-reg_prediction=lm(value ~ unemployment.index.3 + YLag + YLag2 + YLag3 + YLag4 + YLag5 + YLag6, data=df.wide4)
-summary(reg_prediction)
 
-df.wide4$prediction=(0.236498*df.wide4$unemployment.index.3)+(1.041147*df.wide4$YLag)+(-0.348186*df.wide4$YLag2)+(-0.318417*df.wide4$YLag5)+(0.303397*df.wide4$YLag6)
+#Inserts extra timeperiodes to forecast
+dates=as.Date(c("2015-12-01", "2016-01-01", "2016-02-01", "2016-03-01", "2006-04-01", "2016-05-01"))
+unemployment.index.3=c(0, 0, 0, 0, 0, 0)
+#prediction=c(0, 0, 0, 0, 0, 0)
+#XLag=c(0, 0, 0, 0, 0, 0)
+#XLag2=c(0, 0, 0, 0, 0, 0)
+#XLag3=c(0, 0, 0, 0, 0, 0)
+#XLag4=c(0, 0, 0, 0, 0, 0)
+#XLag5=c(0, 0, 0, 0, 0, 0)
+#XLag6=c(0, 0, 0, 0, 0, 0)
+#YLag=c(0, 0, 0, 0, 0, 0)
+#YLag2=c(0, 0, 0, 0, 0, 0)
+#YLag3=c(0, 0, 0, 0, 0, 0)
+value=c(NA, NA, NA, NA, NA, NA)
 
-df.predict=select(df.wide4, c(prediction, value, dates))
-head(df.predict)
-df.predict = df.predict %>% gather(prediction, value, -dates)
-head(df.predict)
+#df.dates=data.frame(dates, unemployment.index.3, value, YLag, YLag2, YLag3, XLag, XLag2, XLag3, XLag4, XLag5, XLag6, stringsAsFactors = FALSE)
+df.dates=data.frame(dates, unemployment.index.3, value, stringsAsFactors = FALSE)
 
-## Plot the prediction against the actual unemployment rate
-p = ggplot(df.predict, aes(x = dates, y = value, group = prediction, colour = prediction))
-p + geom_smooth()  + theme_minimal()
+class(df.dates$dates)
+class(df.dates$YLag)
 
-##Try to forecast
-#Yet to come
+df.wide5=rbind(unemployment.data.3.1, df.dates)
+
+#Making lags
+df.wide5$YLag=lag(df.wide5$value)
+df.wide5$YLag2=lag(df.wide5$YLag)
+df.wide5$YLag3=lag(df.wide5$YLag2)
+
+df.wide5$XLag=lag(df.wide5$unemployment.index.3)
+df.wide5$XLag2=lag(df.wide5$XLag)
+df.wide5$XLag3=lag(df.wide5$XLag2)
+df.wide5$XLag4=lag(df.wide5$XLag3)
+df.wide5$XLag5=lag(df.wide5$XLag4)
+df.wide5$XLag6=lag(df.wide5$XLag5)
+
+
+#Sets missing values to zero otherwise predictions will not be calculated when there is missing one or more values
+df.wide5$YLag[is.na(df.wide5$YLag)]=0
+df.wide5$YLag2[is.na(df.wide5$YLag2)]=0
+df.wide5$YLag3[is.na(df.wide5$YLag3)]=0
+
+df.wide5$XLag[is.na(df.wide5$XLag)]=0
+df.wide5$XLag2[is.na(df.wide5$XLag2)]=0
+df.wide5$XLag3[is.na(df.wide5$XLag3)]=0
+df.wide5$XLag4[is.na(df.wide5$XLag4)]=0
+df.wide5$XLag5[is.na(df.wide5$XLag5)]=0
+df.wide5$XLag6[is.na(df.wide5$XLag6)]=0
+
+
+#Dont use information before 2007-02-01
+df.wide6=subset(df.wide5, dates>as.Date("2007-02-01"))
+
+
+#Make the regression AR(3) model
+reg1 = lm(value ~ YLag + YLag2 + YLag3, data=df.wide6) 
+summary(reg1)
+#Multiple R-squared:  0.5251,	Adjusted R-squared:  0.5109
+
+#Prediction with the AR(3) model
+df.wide6$prediction.AR=-0.0004481+(1.4043643*df.wide6$YLag)+(-0.3947971*df.wide6$YLag2)+(-0.0448659*df.wide6$YLag3)
+df.prediction.AR=select(df.wide6, prediction.AR , dates)
+df.prediction.AR=subset(df.prediction.AR, dates<as.Date("2016-03-01"))
+
+
+#Make the regression with lags from the index
+reg2 = lm(value ~ unemployment.index.3 + XLag + XLag2 + XLag3 + XLag4 + XLag5 + XLag6 , data=df.wide6)
+summary(reg2)
+#Multiple R-squared:  0.8674,	Adjusted R-squared:  0.8577 
+
+#Prediction with lags of the index
+df.wide6$prediction.1=-0.0001641+(0.2816837*df.wide6$unemployment.index.3)+(0.2686221*df.wide6$XLag)+(0.2797936*df.wide6$XLag2)+(0.0830703*df.wide6$XLag3)+(0.0720074*df.wide6$XLag4)-(0.0714837*df.wide6$XLag5)+(0.0376605*df.wide6$XLag6)
+df.prediction.1=select(df.wide6, prediction.1 , dates)
+
+
+df.prediction.2=select(df.wide6, dates, value, prediction.1, prediction.AR)
+sort(df.prediction.2$dates)
+
+
+#Plotting the two predictions against the actual unemployment rate
+p= ggplot() + 
+  geom_smooth(data=df.value, aes(x=dates, y=value), color='green') + 
+  geom_smooth(data=df.prediction.1, aes(x=dates, y=prediction.1), color='red') +
+  geom_smooth(data=df.prediction.AR, aes(x=dates, y=prediction.AR), color='blue')
++ theme_minimal()
+plot(p)
 
 
 
