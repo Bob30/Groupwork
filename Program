@@ -84,10 +84,9 @@ merged.data15 <- merged.data14.b[,c(1,16,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17)] 
 #exports the data frame
 #write.csv(file="C:/Users/ml/Desktop/Mette privat/Polit/Polit 9. semester/Social Data Science/Eksamensprojekt/Data/CSV for google trend/data.final4.csv", x=merged.data15)
 ########################################################################################################################################################
-
 # Start from here
 # load the data
-# merged.data15 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/4df89ca79b8b4ad0c64f5655350e2d408e6ebf1e/data.final3.csv")
+merged.data15 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/4df89ca79b8b4ad0c64f5655350e2d408e6ebf1e/data.final3.csv")
 ## merged.data17 = read.csv("https://gist.githubusercontent.com/Bob30/75e994a523f622943a3d/raw/31d0477878cf8909e58e6a5d8637a76297909185/CV.final.csv")
 # if you just load the final data (data.final2), you have to delete the first column, X.1, which is weird!
 # ONLY IF LOADING: merged.data16=merged.data15[,-c(1)]
@@ -303,7 +302,7 @@ summary(reg2)
 Delete.unsig= c( "Jobnet.Interst.over.time.", "Kontanthjaelp.Interst.over.time.", "dagpenge.Interst.over.time.")
 final3.2= final3[, !names(final3) %in% Delete.unsig, drop = F]
 df3.2 = final3.2
-df3.2 = select(df3.2, -c(X, UnemRate)) # maybe also X.1, 
+df3.2 = select(df3.2, -c(X, X.1, UnemRate)) # maybe also X.1, 
 #df3.2 = gather(df3.2, indicator, value, -dates)
 
 df3.2 <- unique(df3.2)
@@ -355,7 +354,7 @@ Delete.final= c("Job.Interst.over.time.", "Nyt.job.Interst.over.time.", "dagpeng
 final3.3= final3[, !names(final3) %in% Delete.final, drop = F]
 
 df3.3 = final3.3
-df3.3 = select(df3.3, -c(X)) # maybe also X.1, 
+df3.3 = select(df3.3, -c(X, X.1, UnemRate)) # maybe also X.1, 
 df3.3 = gather(df3.3, indicator, value, -dates)
 
 df3.3 <- unique(df3.3)
@@ -366,7 +365,7 @@ df.wide3$dates<- as.Date(df.wide3$dates, "%Y-%m-%d")
 head(df.wide3)
 
 #PCA (delete dates and the actual unemployment rate)
-pca.3 = princomp(select(df.wide3, -c(dates,UnemRate)))
+pca.3 = princomp(select(df.wide3, -c(dates)))
 summary(pca.3)
 
 #Creating an index
@@ -386,7 +385,7 @@ head(unemployment.data.3)
 ## Plot
 unemployment.data.3 = unemployment.data.3 %>% 
   mutate(
-    unemployment.index.3 = scale(unemployment.index.3 * (-1)),
+    unemployment.index.3 = scale(unemployment.index.3 * 1),
     value = scale(value)
   )
 unemployment.data.3 = unemployment.data.3 %>% gather(unemployment.index.3, value, -dates)
@@ -409,7 +408,7 @@ head(unemployment.data.3.1)
 
 unemployment.data.3.1 = unemployment.data.3.1 %>% 
   mutate(
-    unemployment.index.3 = scale(unemployment.index.2*(1)),
+    unemployment.index.3 = scale(unemployment.index.2*(-1)),
     value = scale(value)
   )
 
@@ -473,7 +472,7 @@ df.wide6=subset(df.wide5, dates>as.Date("2007-02-01"))
 #Make the regression AR(3) model
 reg1 = lm(value ~ YLag + YLag2 + YLag3, data=df.wide6) 
 summary(reg1)
-#Multiple R-squared:  0.5251,	Adjusted R-squared:  0.5109
+#Multiple R-squared:  0.9636,	Adjusted R-squared:  0.9625 
 
 #Prediction with the AR(3) model
 df.wide6$prediction.AR=-0.002357+(0.874884*df.wide6$YLag)+(-0.462033*df.wide6$YLag2)+(-0.056229*df.wide6$YLag3)
@@ -487,7 +486,9 @@ summary(reg2)
 #Multiple R-squared:  0.8674,	Adjusted R-squared:  0.8577 
 
 #Prediction with lags of the index
-df.wide6$prediction.1=-0.006239-(0.607374*df.wide6$unemployment.index.3)-(0.411042*df.wide6$XLag)-(0.230656*df.wide6$XLag2)+(0.110705*df.wide6$XLag3)-(0.045351*df.wide6$XLag4)+(0.084909*df.wide6$XLag5)-(0.003930*df.wide6$XLag6)
+#df.wide6$prediction.1=0.001115-(0.106708*df.wide6$unemployment.index.3)-(0.102094*df.wide6$XLag)-(0.126276*df.wide6$XLag2)-(0.139561*df.wide6$XLag3)-(0.208070*df.wide6$XLag4)-(0.200790*df.wide6$XLag5)-(0.145361*df.wide6$XLag6)
+df.wide6$prediction.1=-0.005764+(0.612888*df.wide6$unemployment.index.3)+(0.413494*df.wide6$XLag)-(0.239713*df.wide6$XLag2)-(0.114299*df.wide6$XLag3)+(0.052425*df.wide6$XLag4)-(0.079220*df.wide6$XLag5)+(0.007682*df.wide6$XLag6)
+
 df.prediction.1=select(df.wide6, prediction.1 , dates)
 
 
@@ -502,7 +503,6 @@ p= ggplot() +
   geom_smooth(data=df.prediction.AR, aes(x=dates, y=prediction.AR), color='blue')
 + theme_minimal()
 plot(p)
-
 
 
 
